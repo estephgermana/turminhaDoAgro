@@ -1,0 +1,19 @@
+{
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "express": "^4.19.2",
+    "googleapis": "^135.0.0",
+    "mongodb": "^6.6.1",
+    "mongoose": "^8.3.4"
+  },
+  "name": "squad-04-mulungu",
+  "description": "Bem-vindo(a) a lojinha virutal da Turminha do Agro! Nosso projeto consiste em uma loja virtual onde acontece a venda de produtos e uma sessão com histórias e vídeos para aumentar o alcance da marca e estabelecer uma presença de forma completa no setor audiovisual infantil, foi desenvolvida utilizando HTML, CSS, JavaScript, Bootstrap.\r ## Instalação\r Clone o repositório ou baixe os arquivos e execute o arquivo principal `index.html`, utilizando o novegador de sua escolha.\r ## Pastas\r Os arquivos do projeto foram divididos em pastas:\r - **imagens:** Nessa pasta foram adicionadas todas as imagens usadas no projeto.\r - **css:** Pasta com os arquivos de estilização do projeto.\r - **js:** Pasta com todos os arquivos js do projeto.\r ## Arquivos\r Aqui estão alguns dos principais arquivos do projeto:\r - **index.html:** Arquivo principal HTML da página.\r - **style.css:** Arquivo de estilização da página principal.\r ## Tecnologias Utilizadas\r - HTML\r - CSS\r - JavaScript\r - Bootstrap\r ## Contribuição\r Estamos abertos a contribuições! Se você deseja colaborar com melhorias no projeto, siga os passos abaixo:\r 1. Faça um fork do projeto.\r 2. Crie uma branch para sua feature (`git checkout -b feature/nova-feature`).\r 3. Faça commit das suas mudanças (`git commit -am 'Adiciona nova feature'`).\r 4. Faça push para a branch (`git push origin feature/nova-feature`).\r 5. Crie um novo Pull Request.",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

@@ -1,20 +1,25 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-br">
 
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="server.js">
+
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://kit.fontawesome.com/1165876da6.js" crossorigin="anonymous"></script>
+
+
     <title>Turminha do Agro</title>
 </head>
 
 <body>
 
     <!--Barra de Navegação-->
-
     <nav class="navbar navbar-expand-lg justify-content-end" style="background-color: #C7F2A7; height: 72px;">
         <div class="container-fluid">
             <a  href="index.html">
@@ -77,6 +82,31 @@
             </div>
         </div>
     </div>
+
+
+<!-- Vídeo da Turminha do Agro -->
+<!-- chave da api youtube: AIzaSyAbdt9mYl-pVUD_QQlbDUfM_NJfXw_H1Ac -->
+
+
+<div class="video-container text-center">
+    <h3 class="mb-4">Ouça agora as músicas da Turminha do Agro</h3>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="embed-responsive embed-responsive-16by9">
+                <iframe id="video1" class="embed-responsive-item" width="400" height="225" src="https://www.youtube.com/embed/5Mzs1co7Mis" allowfullscreen></iframe>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="embed-responsive embed-responsive-16by9">
+                <iframe id="video2" class="embed-responsive-item" width="400" height="225" src="https://www.youtube.com/embed/Uau-4IrwS3U" allowfullscreen></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
     <!-- Mais Desejados -->
     <div class="titulo-divisor">
         <img class="trator" src="imagens/trator.png" alt="Trator">
@@ -348,6 +378,32 @@
             </div>
         </div>
     </section>
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <h3>Contatos</h3>
+                <p>Email:turminhadoagro@email.com</p>
+                <p>Fone:+55 81 980028922</p>
+            </div>
+            <div class="footer-content">
+                <h3>Links</h3>
+                 <ul class="list">
+                    <li><a href="">Home</a></li>
+                 </ul>
+            </div>
+            <div class="footer-content">
+                <h3>Acompanhe nas redes sociais</h3>
+                <ul class="social-icons">
+                 <li><a href="https://open.spotify.com/intl-pt/artist/7yexTxwEgFsZGl3uthXdRO?si=Ll9qw6fYSWW90Dqc5fhRxg"><i class="fab fa-spotify"></i></a></li>
+                 <li><a href="https://www.youtube.com/@turminhadoagro"><i class="fab fa-youtube"></i></a></li>
+                 <li><a href="https://www.instagram.com/turminhadoagro/"><i class="fab fa-instagram"></i></a></li>
+                </ul>
+                </div>
+        </div>
+        <div class="bottom-bar">
+            <p>&copy; 2017 Mulungu Studio</p>
+        </div>
+    </footer>
 
     <!-- Carrinho de compras -->
 
@@ -358,88 +414,88 @@
         </div>
         <div class="offcanvas-body">
             <div class="content-cart" id="carrinho">
-                <section>
-                    <table>
-                        <tbody>
-                            <tr>
-                                <div class="item-cart">
-                                    <td>
-                                        <div class="product">
-                                            <img src="imagens/personagem_cacá.png" alt="Boneca da Cacá" />
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="info">
-                                            <div class="name">Boneca da Cacá</div>
-                                            <div class="qty">
-                                                <button><i class="bi bi-plus"></i></button>
-                                                <span>2</span>
-                                                <button><i class="bi bi-dash"></i></button>
-                                            </div>
-                                            <div class="preco-card">R$55,99</div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <button class="remove"><i class="bi bi-x"></i></button>
-                                    </td>
-                                </div>
-                            </tr>
-                            <tr>
-                                <div class="item-cart">
-                                    <td>
-                                        <div class="product">
-                                            <img src="imagens/personagem_neco.png" alt="Boneca da Cacá" />
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="info">
-                                            <div class="name">Boneco do Neco</div>
-                                            <div class="qty">
-                                                <button><i class="bi bi-plus"></i></button>
-                                                <span>2</span>
-                                                <button><i class="bi bi-dash"></i></button>
-                                            </div>
-                                            <div class="preco-card">R$55,99</div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <button class="remove"><i class="bi bi-x"></i></button>
-                                    </td>
-                                </div>
-                            </tr>
-                        </tbody>
-                    </table>
-                </section>
-                <br>
-                <aside>
-                    <div class="box">
-                        <header>Resumo da compra</header>
-                        <div class="info">
-                            <div><span>Sub-total</span><span>R$ 111,80</span></div>
-                            <div><span>Caulcule o frete</span></div>
-                            <div>
-                                <input type="text" class="form-control" placeholder="Digite o CEP" aria-label="CEP"
-                                    aria-describedby="button-addon2">
-                                <button class="btn btn-outline-secondary" type="button" id="button-addon2">
-                                    <i class="bi bi-plus"></i>
-                            </div>
-                        </div>
-                        <footer>
-                            <span>Total</span>
-                            <span class="preco-carrinho-sub-total">R$ 111,80</span>
-                        </footer>
-                    </div>
-                    <button>Finalizar Compra</button>
-                </aside>
+                <!-- Esta div será preenchida dinamicamente com os produtos -->
             </div>
+            <div class="box">
+                <header>Resumo da compra</header>
+                <div class="info">
+                    <div><span>Sub-total</span><span class="preco-carrinho-sub-total">R$ 0,00</span></div>
+                    <div><span>Calcule o frete</span></div>
+                    <div>
+                        <input type="text" class="form-control" placeholder="Digite o CEP" aria-label="CEP" aria-describedby="button-addon2">
+                        <button class="btn btn-outline-secondary" type="button" id="button-addon2"><i class="bi bi-plus"></i></button>
+                    </div>
+                </div>
+                <footer>
+                    <span>Total</span>
+                    <span class="preco-carrinho-total">R$ 0,00</span>
+                </footer>
+            </div>
+            <button class="btn-finalizar-compra">Comprar</button>
         </div>
-
+    </div>
+    
         
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous">
             </script>
         <script src="script.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const addToCartButtons = document.querySelectorAll('.btn.btn-success');
+                const cartContainer = document.getElementById('carrinho');
+                const subtotalElement = document.querySelector('.preco-carrinho-sub-total');
+                const totalElement = document.querySelector('.preco-carrinho-total');
+        
+                addToCartButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        const cardBody = button.closest('.card-body');
+                        const productName = cardBody.querySelector('.card-title').textContent;
+                        const productPriceText = cardBody.querySelector('.preco-card').textContent;
+                        const productPrice = parseFloat(productPriceText.replace('Por R$', '').replace('à vista', '').replace('ou', '').replace('x de R$', '').trim());
+                        const product = { name: productName, price: productPrice };
+                        addToCart(product);
+                    });
+                });
+        
+                function addToCart(product) {
+                    const cartItem = document.createElement('div');
+                    cartItem.classList.add('item-cart');
+        
+                    const productNameElement = document.createElement('div');
+                    productNameElement.classList.add('name');
+                    productNameElement.textContent = product.name;
+        
+                    const productPriceElement = document.createElement('div');
+                    productPriceElement.classList.add('preco-card');
+                    productPriceElement.textContent = 'R$ ' + product.price.toFixed(2).replace('.', ',');
+        
+                    cartItem.appendChild(productNameElement);
+                    cartItem.appendChild(productPriceElement);
+        
+                    cartContainer.appendChild(cartItem);
+        
+                    // Atualizar subtotal e total
+                    updateTotal();
+                }
+        
+                function updateTotal() {
+                    let subtotal = 0;
+                    cartContainer.querySelectorAll('.preco-card').forEach(priceElement => {
+                        subtotal += parseFloat(priceElement.textContent.replace('R$', '').replace(',', '.'));
+                    });
+        
+                    subtotalElement.textContent = 'R$ ' + subtotal.toFixed(2).replace('.', ',');
+                    totalElement.textContent = 'R$ ' + subtotal.toFixed(2).replace('.', ',');
+                }
+            });
+        </script>
+        
+        
+        
+
+       
 </body>
 
 

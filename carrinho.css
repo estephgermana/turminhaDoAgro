@@ -1,0 +1,87 @@
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #C7F7F0;   
+
+}
+
+.container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+.title {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.label {
+    font-weight: bold;
+}
+
+.input-text {
+    width: calc(100% - 20px);
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    
+}
+
+.radio-group {
+    display: block;
+    margin-bottom: 100px; 
+}
+
+.radio-label {
+    margin-right: 10px;
+}
+.subtitulo{
+    margin-top: 30px;
+}
+
+.frete, .total {
+    display: flex;
+    justify-content: space-between;
+}
+
+.frete-nome,.total-nome {
+    font-weight: normal; 
+}
+
+.frete-valor, .total-valor {
+    font-weight: bold;
+}
+
+.detalhes-cartao-input,
+.detalhes-cartao-select {
+    display: block;
+    margin-bottom: 10px;
+}
+
+.btn-primary {
+    background-color: #28a745;
+    color: #fff;
+    border-color: #28a745; 
+}
+
+.btn-custom {
+    background-color: #28a745;
+    color: #fff;
+    display: block;
+    margin: 0 auto;
+    margin-top: 20px;
+    margin-bottom: 20px; 
+}
+
+#btn-comprar:hover {
+    background-color: #218838;
+}
