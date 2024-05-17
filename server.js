@@ -9,6 +9,7 @@ const uri = 'mongodb://localhost:27017';
 const dbName = 'TurminhaDoAgro';
 const collectionName = 'products';
 const cartCollectionName = 'carrinho';
+const userCollectionName = 'user';
 
 
 const newId = new ObjectId();
@@ -52,6 +53,28 @@ app.delete('/api/products/:id', async (req, res) => {
     } catch (error) {
         console.error('Erro ao excluir produto:', error);
         res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+});
+
+// Rota para visualizar todos os usuários
+app.get('/api/users', async (req, res) => {
+    const client = new MongoClient(uri);
+
+    try {
+        await client.connect();
+        const database = client.db(dbName);
+        const collection = database.collection(userCollectionName);
+
+        // Encontrar todos os usuários na coleção
+        const users = await collection.find({}).toArray();
+
+        // Retorna a lista de usuários
+        res.json(users);
+    } catch (error) {
+        console.error('Erro ao listar usuários:', error);
+        res.status(500).json({ error: 'Erro interno do servidor' });
+    } finally {
+        await client.close();
     }
 });
 
@@ -275,6 +298,43 @@ app.post('/api/sales/complete', async (req, res) => {
     }
 });
 
+// USUARIOS
+// Rota para visualizar todos os usuários
+app.get('/api/users', async (req, res) => {
+    const client = new MongoClient(uri);
+
+    try {
+        await client.connect();
+        const database = client.db(dbName);
+        const collection = database.collection(userCollectionName);
+        const users = await collection.find({}).toArray();
+        res.json(users);
+    } catch (error) {
+        console.error('Erro ao listar usuários:', error);
+        res.status(500).json({ error: 'Erro interno do servidor' });
+    } finally {
+        await client.close();
+    }
+});
+
+// Rota para adicionar um usuário
+app.post('/api/users', async (req, res) => {
+    const client = new MongoClient(uri);
+    
+    try {
+        await client.connect();
+        const database = client.db(dbName);
+        const collection = database.collection(userCollectionName);
+        const { nome, email, senha } = req.body;
+        const result = await collection.insertOne({ nome, email, senha });
+        res.json({ message: "Usuário adicionado com sucesso", userId: result.insertedId });
+    } catch (error) {
+        console.error('Erro ao adicionar usuário:', error);
+        res.status(500).json({ error: 'Erro interno do servidor' });
+    } finally {
+        await client.close();
+    }
+});
 
 app.listen(port, () => {
     console.log(`Servidor iniciado na porta ${port}`);
