@@ -7,6 +7,7 @@
     <title>Cadastro</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
         crossorigin="anonymous"></script>
@@ -14,37 +15,27 @@
 
     <style>
         input[type="submit"] {
-            background-image: none;
-            border: 10;
-        }
-
-        input[type="submit"] {
-            background-color: chartreuse;
-            /* Substitua esta cor pelo que você deseja */
+            background-color: #2A8C37;
             color: #fff;
-            /* Cor do texto dentro do botão */
-            padding: 5px 60px;
-            /* Ajuste o preenchimento conforme necessário */
+            padding: 5px 50px;
             border: none;
             cursor: pointer;
             border-radius: 15px;
-
         }
 
         input[type="submit"]:hover {
             background-color: #83ff7c;
-            /* Cor do botão ao passar o mouse sobre ele */
         }
     </style>
 </head>
 
 <body>
-    
+
     <main>
         <a href="index.html"><img class="logo" src="imagens/logo_turminha.png"></a>
         <div class="form-container">
             <h2>Cadastro</h2>
-            <form action="cadastro da turminha" method="POST">
+            <form id="cadastroForm">
                 <div class="form-group">
                     <label for="nome">Seu nome:</label>
                     <input type="text" id="nome" name="nome" required>
@@ -60,25 +51,48 @@
                     <input type="password" id="senha" name="senha" required>
                 </div>
 
-                <div class="form-group">
-                    <label for="confirm_senha">Confirme a Senha:</label>
-                    <input type="password" id="confirm_senha" name="confirm_senha" required>
-                </div>
                 <br>
 
-                <input type="submit" value="Fazer Cadastro" style="color: #CBF29D;background: #2A8C37;;">
+                <input type="submit" value="Fazer Cadastro">
                 <br>
                 <br>
                 <a href="login.html"><p style="color: rgb(93, 0, 255); font-family: 'Arial', sans-serif; ">Login</p></a>
 
-
-
-
             </form>
-            <script src="script.js"></script>
-
         </div>
     </main>
+
+    <script>
+        document.getElementById('cadastroForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            let nome = document.getElementById('nome').value;
+            let email = document.getElementById('email').value;
+            let senha = document.getElementById('senha').value;
+            fetch('http://localhost:3000/api/cadastro', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ nome, email, senha })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    alert(data.message);
+                    window.location.href = 'index.html';
+                }
+
+                localStorage.setItem('nomeUsuario', nome);
+                window.location.href = 'index.html'; 
+            })
+            .catch(error => {
+                console.error('Erro ao cadastrar usuário:', error);
+                alert('Erro ao cadastrar usuário. Por favor, tente novamente.');
+            });
+        });
+    </script>
 
 </body>
 
