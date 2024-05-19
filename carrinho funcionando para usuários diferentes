@@ -132,14 +132,19 @@ app.put('/api/products/:id', async (req, res) => {
 // carrinho:
 // Adicionar Item ao Carrinho
 app.post('/api/cart/add', async (req, res) => {
+    const client = new MongoClient(uri);
+
     try {
-        const client = new MongoClient(uri);
         await client.connect();
-        const productsCollectionName = 'products';
         const database = client.db(dbName);
-        const productsCollection = database.collection(productsCollectionName);
+        const productsCollection = database.collection(collectionName);
         const cartCollection = database.collection(cartCollectionName);
-        const { productId, quantity } = req.body;
+        const { userId, productId, quantity } = req.body;
+
+        // Validação de Entrada
+        if (!ObjectId.isValid(productId) || !Number.isInteger(quantity) || quantity <= 0) {
+            return res.status(400).json({ error: "Dados inválidos" });
+        }
 
         // Verifica se o produto existe no estoque
         const product = await productsCollection.findOne({ _id: new ObjectId(productId) });
@@ -153,115 +158,121 @@ app.post('/api/cart/add', async (req, res) => {
         }
 
         // Adiciona o item ao carrinho
-        await cartCollection.insertOne({ productId, quantity });
+        await cartCollection.insertOne({ userId: new ObjectId(userId), productId: new ObjectId(productId), quantity });
 
-        res.json({ message: "Produto adicionado ao carrinho com sucesso" });
+        res.json({ message: `Produto adicionado ao carrinho do ${userId} com sucesso` });
     } catch (error) {
         console.error('Erro ao adicionar item ao carrinho:', error);
         res.status(500).json({ error: 'Erro interno do servidor' });
+    } finally {
+        await client.close();
     }
 });
 
-
-// Visualizar Carrinho
-app.get('/api/cart', async (req, res) => {
+// Visualizar Carrinho do Usuário
+app.get('/api/cart/:userId', async (req, res) => {
     try {
         const client = new MongoClient(uri);
         await client.connect();
-        const productsCollectionName = 'products';
         const database = client.db(dbName);
         const cartCollection = database.collection(cartCollectionName);
-        const productsCollection = database.collection(productsCollectionName);
+        const productsCollection = database.collection(collectionName);
 
-        const items = await cartCollection.find({}).toArray();
+        const userId = req.params.userId;
+
+        // Busca todos os itens do carrinho do usuário
+        const items = await cartCollection.find({ userId: new ObjectId(userId) }).toArray();
         const cart = [];
 
         for (const item of items) {
             const product = await productsCollection.findOne({ _id: new ObjectId(item.productId) });
-            cart.push({ 
-                productId: item.productId, 
-                name: product.name,
-                price: product.price,
-                quantity: item.quantity
-            });
+            if (product) {
+                cart.push({
+                    productId: item.productId,
+                    name: product.name,
+                    price: product.price,
+                    quantity: item.quantity
+                });
+            } else {
+                console.error(`Produto com ID ${item.productId} não encontrado no estoque.`);
+            }
         }
 
         res.json(cart);
     } catch (error) {
-        console.error('Erro ao visualizar carrinho:', error);
+        console.error('Erro ao visualizar carrinho do usuário:', error);
         res.status(500).json({ error: 'Erro interno do servidor' });
     }
 });
 
-// Remover Item do Carrinho
-app.delete('/api/cart/remove/:productId', async (req, res) => {
+// Remover Quantidade Específica do Item do Carrinho do Usuário
+app.delete('/api/cart/remove/:userId/:productId', async (req, res) => {
     try {
         const client = new MongoClient(uri);
         await client.connect();
         const database = client.db(dbName);
         const cartCollection = database.collection(cartCollectionName);
+        const { userId, productId } = req.params;
+        const { quantityToRemove } = req.query; // Obter a quantidade a ser removida
 
-        const result = await cartCollection.deleteOne({ productId: req.params.productId });
-
-        if (result.deletedCount === 1) {
-            res.json({ message: "Item removido do carrinho com sucesso" });
-        } else {
-            res.status(404).json({ error: "Item não encontrado no carrinho" });
+        // Verificar se a quantidade a ser removida é válida
+        if (!quantityToRemove || isNaN(quantityToRemove) || quantityToRemove <= 0) {
+            return res.status(400).json({ error: "Quantidade inválida a ser removida" });
         }
+
+        // Verificar se o item está no carrinho
+        const item = await cartCollection.findOne({ userId: new ObjectId(userId), productId: new ObjectId(productId) });
+        if (!item) {
+            return res.status(404).json({ error: "Item não encontrado no carrinho" });
+        }
+
+        // Calcular a nova quantidade após a remoção
+        const newQuantity = item.quantity - parseInt(quantityToRemove, 10);
+
+        // Se a nova quantidade for menor ou igual a zero, remover o item do carrinho
+        if (newQuantity <= 0) {
+            await cartCollection.deleteOne({ userId: new ObjectId(userId), productId: new ObjectId(productId) });
+        } else {
+            await cartCollection.updateOne(
+                { userId: new ObjectId(userId), productId: new ObjectId(productId) },
+                { $set: { quantity: newQuantity } }
+            );
+        }
+
+        res.json({ message: `Quantidade removida do carrinho com sucesso para o produto ${productId}` });
     } catch (error) {
         console.error('Erro ao remover item do carrinho:', error);
         res.status(500).json({ error: 'Erro interno do servidor' });
     }
 });
 
-// Atualizar Quantidade do Item no Carrinho
-app.put('/api/cart/update/:productId', async (req, res) => {
+
+
+// Rota para concluir uma venda para um usuário específico
+app.post('/api/sales/complete/:userId', async (req, res) => {
+    const { userId } = req.params;
+
     try {
         const client = new MongoClient(uri);
         await client.connect();
         const database = client.db(dbName);
-        const cartCollection = database.collection(cartCollectionName);
-
-        const { quantity } = req.body;
-
-        const result = await cartCollection.updateOne(
-            { productId: req.params.productId },
-            { $set: { quantity } }
-        );
-
-        if (result.modifiedCount === 1) {
-            res.json({ message: "Quantidade do item atualizada com sucesso" });
-        } else {
-            res.status(404).json({ error: "Item não encontrado no carrinho" });
-        }
-    } catch (error) {
-        console.error('Erro ao atualizar quantidade do item no carrinho:', error);
-        res.status(500).json({ error: 'Erro interno do servidor' });
-    }
-});
-
-// Rota para concluir uma venda
-app.post('/api/sales/complete', async (req, res) => {
-    try {
-        const client = new MongoClient(uri);
-        await client.connect();
-        const database = client.db(dbName);
-        const productsCollectionName = 'products';
         const salesCollection = database.collection('sales');
+        const productsCollectionName = 'products';
         const productsCollection = database.collection(productsCollectionName);
         const cartCollection = database.collection(cartCollectionName);
-        const items = await cartCollection.find({}).toArray();
+
+        // Busca todos os itens do carrinho do usuário específico
+        const items = await cartCollection.find({ userId: new ObjectId(userId) }).toArray();
 
         if (items.length === 0) {
             return res.status(400).json({ error: "Carrinho vazio. Não é possível concluir a venda." });
         }
 
-        const saleDetails = []; 
+        const saleDetails = [];
 
         for (const item of items) {
             const product = await productsCollection.findOne({ _id: new ObjectId(item.productId) });
 
- 
             if (!product) {
                 return res.status(404).json({ error: "Produto não encontrado no estoque" });
             }
@@ -270,26 +281,29 @@ app.post('/api/sales/complete', async (req, res) => {
                 return res.status(400).json({ error: `Estoque insuficiente para ${product.name}` });
             }
 
-            
+            // Atualiza o estoque do produto
             await productsCollection.updateOne(
                 { _id: new ObjectId(item.productId) },
-                { $inc: { stock: -item.quantity } } 
+                { $inc: { stock: -item.quantity } }
             );
 
             saleDetails.push({
                 productId: item.productId,
                 productName: product.name,
                 quantity: item.quantity,
-                price: product.price * item.quantity 
+                price: product.price * item.quantity
             });
         }
 
+        // Registra a venda no banco de dados
         const sale = {
+            userId: new ObjectId(userId),
             timestamp: new Date(),
             items: saleDetails
         };
+
         const result = await salesCollection.insertOne(sale);
-        await cartCollection.deleteMany({});
+        await cartCollection.deleteMany({ userId: new ObjectId(userId) });
 
         res.json({ message: "Venda concluída com sucesso", saleId: result.insertedId });
     } catch (error) {
@@ -297,6 +311,7 @@ app.post('/api/sales/complete', async (req, res) => {
         res.status(500).json({ error: 'Erro interno do servidor' });
     }
 });
+
 
 // USUARIOS
 // Rota para visualizar todos os usuários
@@ -317,22 +332,29 @@ app.get('/api/users', async (req, res) => {
     }
 });
 
-// Rota para adicionar um usuário
-app.post('/api/users', async (req, res) => {
+// Endpoint para cadastrar um usuário
+app.post('/api/cadastro', async (req, res) => {
     const client = new MongoClient(uri);
-    
+
     try {
         await client.connect();
         const database = client.db(dbName);
         const collection = database.collection(userCollectionName);
+
         const { nome, email, senha } = req.body;
+
+        // Verifica se o usuário já existe pelo e-mail
+        const existingUser = await collection.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ error: 'E-mail já cadastrado' });
+        }
+
+        // Insere o novo usuário
         const result = await collection.insertOne({ nome, email, senha });
-        res.json({ message: "Usuário adicionado com sucesso", userId: result.insertedId });
+        res.status(201).json({ message: 'Usuário cadastrado com sucesso', userId: result.insertedId });
     } catch (error) {
-        console.error('Erro ao adicionar usuário:', error);
+        console.error('Erro ao cadastrar usuário:', error);
         res.status(500).json({ error: 'Erro interno do servidor' });
-    } finally {
-        await client.close();
     }
 });
 
