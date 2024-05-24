@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const { MongoClient } = require('mongodb');
 const { ObjectId } = require('mongodb');
 const cors = require('cors'); 
-const bcrypt = require('bcrypt'); // Para hashing de senhas
+const nodemailer = require('nodemailer');
 
 const app = express();
 const port = 3000;
@@ -18,6 +18,15 @@ const client = new MongoClient(uri, { useUnifiedTopology: true });
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors()); // Ativando o CORS
+
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'estephani.germana@gmail.com',
+        pass: 'tdup byzz bnbe regj'
+    }
+});
+
 
 // Rota para adicionar um produto
 app.post('/api/products', async (req, res) => {
@@ -249,20 +258,18 @@ app.delete('/api/cart/remove/:userId/:productId', async (req, res) => {
     }
 });
 
-
-
 // Rota para concluir uma venda para um usuário específico
 app.post('/api/sales/complete/:userId', async (req, res) => {
     const { userId } = req.params;
+    const { paymentMethod } = req.body;
 
     try {
-        const client = new MongoClient(uri);
         await client.connect();
         const database = client.db(dbName);
-        const salesCollection = database.collection('sales');
-        const productsCollectionName = 'products';
-        const productsCollection = database.collection(productsCollectionName);
         const cartCollection = database.collection(cartCollectionName);
+        const productsCollection = database.collection(collectionName);
+        const salesCollection = database.collection('sales');
+        const userCollection = database.collection(userCollectionName);
 
         // Busca todos os itens do carrinho do usuário específico
         const items = await cartCollection.find({ userId: new ObjectId(userId) }).toArray();
@@ -299,22 +306,84 @@ app.post('/api/sales/complete/:userId', async (req, res) => {
         }
 
         // Registra a venda no banco de dados
+        const user = await userCollection.findOne({ _id: new ObjectId(userId) });
+
         const sale = {
             userId: new ObjectId(userId),
+            userName: user.nome,
+            userEmail: user.email,
             timestamp: new Date(),
-            items: saleDetails
+            items: saleDetails,
+            paymentMethod: paymentMethod
         };
 
         const result = await salesCollection.insertOne(sale);
         await cartCollection.deleteMany({ userId: new ObjectId(userId) });
 
-        res.json({ message: "Venda concluída com sucesso", saleId: result.insertedId });
+        // Mensagem de confirmação da compra para o Postman
+        const postmanMessage = `Olá ${user.nome}, Sua compra foi realizada com sucesso. Detalhes da compra: ${saleDetails.map(item => `${item.productName}, R$${item.price.toFixed(2)}, Pagamento: ${paymentMethod}`).join('\n')}Obrigado por comprar com a TurminhaDoAgro!`;
+
+        // Mensagem de confirmação da compra para o Email
+        const emailMessage = `Olá ${user.nome}, espero que esteja bem!!\n\nSua compra foi realizada com sucesso! Já vamos preparar seu pedido para envio.\n\nDetalhes da compra:\nVocê adquiriu o(s) produto(s):\n${saleDetails.map(item => `${item.productName}`).join(', ')}\nValor: R$${saleDetails.reduce((acc, item) => acc + item.price, 0).toFixed(2)}\nMétodo de Pagamento: ${paymentMethod}\n\nObrigado por comprar com a TurminhaDoAgro!`;
+
+        // Configuração do email
+        const mailOptions = {
+            from: 'turminhadoagro9@gmail.com',
+            to: user.email,
+            subject: 'Confirmação de Compra - TurminhaDoAgro',
+            text: emailMessage
+        };
+
+        // Envia o email
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.error('Erro ao enviar email:', error);
+                return res.status(500).json({ error: 'Erro ao enviar email de confirmação' });
+            } else {
+                console.log('Email enviado:', info.response);
+                res.json({
+                    message: postmanMessage,
+                    saleId: result.insertedId
+                });
+            }
+        });
     } catch (error) {
         console.error('Erro ao concluir a venda:', error);
         res.status(500).json({ error: 'Erro interno do servidor' });
     }
 });
 
+// Rota para obter o histórico de compras de um usuário
+app.get('/api/sales/history/:userId', async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        await client.connect();
+        const database = client.db(dbName);
+        const salesCollection = database.collection('sales');
+
+        // Busca todas as vendas do usuário específico
+        const sales = await salesCollection.find({ userId: new ObjectId(userId) }).toArray();
+
+        // Formata os detalhes da venda
+        const salesHistory = sales.map(sale => ({
+            saleId: sale._id.toString(),
+            timestamp: sale.timestamp.toLocaleString(),
+            items: sale.items.map(item => ({
+                productName: item.productName,
+                quantity: item.quantity,
+                price: item.price,
+                status: 'Enviado'
+            })),
+            paymentMethod: sale.paymentMethod
+        }));
+
+        res.json(salesHistory);
+    } catch (error) {
+        console.error('Erro ao obter o histórico de compras:', error);
+        res.status(500).json({ error: 'Erro interno do servidor' });
+    } 
+});
 
 // USUARIOS
 // Rota para visualizar todos os usuários
@@ -384,6 +453,7 @@ app.post('/api/login', async (req, res) => {
         res.status(500).json({ error: 'Erro interno do servidor' });
     }
 });
+
 
 app.listen(port, () => {
     console.log(`Servidor iniciado na porta ${port}`);
